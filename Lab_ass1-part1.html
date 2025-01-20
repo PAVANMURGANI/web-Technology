@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="libraryApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Application</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="LibraryController">
+
+    <h1>Library Categories</h1>
+    
+    <!-- Display the table -->
+    <table border="1" width="50%">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Book Count</th>
+                <th>Update Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="item in library">
+                <td>{{ item.category }}</td>
+                <td>{{ item.count }}</td>
+                <td>
+                    <input type="number" ng-model="item.count" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Add new category -->
+    <h2>Add New Category</h2>
+    <form ng-submit="addCategory()">
+        <label for="newCategory">Category:</label>
+        <input type="text" id="newCategory" ng-model="newCategory.name" required />
+
+        <label for="newCount">Initial Book Count:</label>
+        <input type="number" id="newCount" ng-model="newCategory.count" required />
+
+        <button type="submit">Add</button>
+    </form>
+
+    <p style="color: red;" ng-if="errorMessage">{{ errorMessage }}</p>
+
+    <script>
+        // Define the AngularJS application
+        const app = angular.module('libraryApp', []);
+
+        app.controller('LibraryController', function ($scope) {
+            // Initial data
+            $scope.library = [
+                { category: 'Fiction', count: 120 },
+                { category: 'Non-Fiction', count: 80 },
+                { category: 'Science', count: 150 },
+                { category: 'Mathematics', count: 70 },
+            ];
+
+            // Add a new category
+            $scope.addCategory = function () {
+                if ($scope.library.some(item => item.category === $scope.newCategory.name)) {
+                    $scope.errorMessage = "Category already exists!";
+                    return;
+                }
+
+                $scope.library.push({
+                    category: $scope.newCategory.name,
+                    count: $scope.newCategory.count
+                });
+
+                $scope.newCategory = {}; // Clear the input fields
+                $scope.errorMessage = ""; // Clear the error message
+            };
+        });
+    </script>
+</body>
+</html>
