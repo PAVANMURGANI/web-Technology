@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="movieApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Rental Store</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="MovieController">
+
+    <h1>Movie Rental Store</h1>
+
+    <!-- Filters -->
+    <h3>Filter Movies</h3>
+    <label for="genre">Genre:</label>
+    <select id="genre" ng-model="selectedGenre" ng-options="genre for genre in genres">
+        <option value="">All Genres</option>
+    </select>
+
+    <label for="releaseYear">Release Year:</label>
+    <select id="releaseYear" ng-model="selectedYear" ng-options="year for year in releaseYears">
+        <option value="">All Years</option>
+    </select>
+
+    <!-- Movie Table -->
+    <h3>Available Movies</h3>
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Release Year</th>
+                <th>Rental Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="movie in filteredMovies = (movies | filter:{genre: selectedGenre, year: selectedYear})">
+                <td>{{ movie.title }}</td>
+                <td>{{ movie.genre }}</td>
+                <td>{{ movie.year }}</td>
+                <td>{{ calculateRentalPrice(movie.year) | currency }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p ng-if="filteredMovies.length === 0">No movies match the selected criteria.</p>
+
+    <script>
+        // Define the AngularJS application
+        const app = angular.module('movieApp', []);
+
+        app.controller('MovieController', function ($scope) {
+            // Initial dataset
+            $scope.movies = [
+                { title: 'Inception', genre: 'Sci-Fi', year: 2010 },
+                { title: 'Parasite', genre: 'Drama', year: 2019 },
+                { title: 'The Dark Knight', genre: 'Action', year: 2008 },
+                { title: 'Avengers: Endgame', genre: 'Action', year: 2019 },
+                { title: 'Interstellar', genre: 'Sci-Fi', year: 2014 }
+            ];
+
+            // Extract unique genres and release years
+            $scope.genres = [...new Set($scope.movies.map(movie => movie.genre))];
+            $scope.releaseYears = [...new Set($scope.movies.map(movie => movie.year))];
+
+            // Calculate rental price based on year
+            $scope.calculateRentalPrice = function (year) {
+                const currentYear = new Date().getFullYear();
+                return (currentYear - year) <= 3 ? 5 : 3;
+            };
+        });
+    </script>
+</body>
+</html>
