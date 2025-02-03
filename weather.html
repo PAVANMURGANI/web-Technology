@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <style>
+        /* Dark Theme with Glassmorphism Effect */
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        h2 {
+            text-align: center;
+            color: #fff;
+            font-weight: 600;
+        }
+        .weather-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #1e3c72;
+        }
+        .input-group input {
+            height: 50px;
+            font-size: 18px;
+        }
+        .list-group-item {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body ng-app="weatherApp">
+
+    <div class="container" ng-controller="WeatherController">
+        <h2>Weather Dashboard</h2>
+
+        <!-- Search Bar -->
+        <div class="input-group">
+            <input type="text" class="form-control" ng-model="city" placeholder="Enter city name">
+            <div class="input-group-append">
+                <button class="btn btn-primary" ng-click="getWeather()">Get Weather</button>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="alert alert-danger mt-2" ng-if="errorMessage">{{ errorMessage }}</div>
+
+        <!-- Weather Info -->
+        <div class="weather-box" ng-if="weatherData">
+            <h4>{{ weatherData.name }}</h4>
+            <p><strong>Temperature:</strong> {{ weatherData.main.temp }}°C</p>
+            <p><strong>Humidity:</strong> {{ weatherData.main.humidity }}%</p>
+            <p><strong>Conditions:</strong> {{ weatherData.weather[0].description }}</p>
+            <button class="btn btn-success" ng-click="addToFavorites()">Add to Favorites</button>
+        </div>
+
+        <!-- Favorite Cities -->
+        <div class="weather-box" ng-if="favoriteCities.length > 0">
+            <h4>Favorite Cities</h4>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between" ng-repeat="city in favoriteCities | orderBy">
+                    {{ city }}
+                    <button class="btn btn-danger btn-sm" ng-click="removeFavorite(city)">Remove</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        var app = angular.module('weatherApp', []);
+
+        app.controller('WeatherController', function($scope, $http) {
+            $scope.city = "";
+            $scope.weatherData = null;
+            $scope.errorMessage = "";
+            $scope.favoriteCities = JSON.parse(localStorage.getItem("favorites")) || [];
+
+            const API_KEY = "bd5e378503939ddaee76f12ad7a97608";  // Replace with your API Key
+
+            // Fetch Weather Data
+            $scope.getWeather = function() {
+                if ($scope.city) {
+                    let url = `https://api.openweathermap.org/data/2.5/weather?q=${$scope.city}&appid=${API_KEY}&units=metric`;
+                    $http.get(url).then(
+                        function(response) {
+                            $scope.weatherData = response.data;
+                            $scope.errorMessage = "";
+                        },
+                        function(error) {
+                            $scope.weatherData = null;
+                            $scope.errorMessage = "City not found or API request failed.";
+                        }
+                    );
+                }
+            };
+
+            // Add to Favorites
+            $scope.addToFavorites = function() {
+                if ($scope.city && !$scope.favoriteCities.includes($scope.city)) {
+                    $scope.favoriteCities.push($scope.city);
+                    localStorage.setItem("favorites", JSON.stringify($scope.favoriteCities));
+                }
+            };
+
+            // Remove from Favorites
+            $scope.removeFavorite = function(city) {
+                $scope.favoriteCities = $scope.favoriteCities.filter(favCity => favCity !== city);
+                localStorage.setItem("favorites", JSON.stringify($scope.favoriteCities));
+            };
+        });
+    </script>
+
+</body>
+</html>
